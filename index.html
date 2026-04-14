@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>재무 계산기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --text: #1a2332;
+      --muted: #5c6b7f;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --border: #e2e8f0;
+      --success: #059669;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: linear-gradient(165deg, #eef4ff 0%, var(--bg) 45%, #faf8ff 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    header {
+      margin-bottom: 1.75rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.35rem;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .tabs button {
+      flex: 1;
+      min-width: 0;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .tabs button:hover {
+      border-color: #cbd5e1;
+      color: var(--text);
+    }
+
+    .tabs button.active {
+      background: var(--accent-soft);
+      border-color: #93c5fd;
+      color: var(--accent);
+      box-shadow: 0 1px 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .panel {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.35rem 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font: inherit;
+      font-size: 1rem;
+      background: #fafbfc;
+      color: var(--text);
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+
+    .field .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .result {
+      margin-top: 1.25rem;
+      padding: 1rem 1.1rem;
+      background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+    }
+
+    .result h3 {
+      margin: 0 0 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .result .big {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--success);
+      letter-spacing: -0.02em;
+    }
+
+    .result .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 0.35rem 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .result .row:last-child {
+      border-bottom: none;
+    }
+
+    .result .row span:first-child {
+      color: var(--muted);
+    }
+
+    .result .row span:last-child {
+      font-weight: 600;
+      color: var(--text);
+      text-align: right;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>재무 계산기</h1>
+      <p>대출 상환, 적금·예금 복리, 목표 금액을 빠르게 계산합니다.</p>
+    </header>
+
+    <div class="tabs" role="tablist">
+      <button type="button" class="active" data-tab="loan" role="tab" aria-selected="true">대출 상환</button>
+      <button type="button" data-tab="savings" role="tab" aria-selected="false">적금·예금</button>
+      <button type="button" data-tab="goal" role="tab" aria-selected="false">목표 적금</button>
+    </div>
+
+    <section id="panel-loan" class="panel active" role="tabpanel">
+      <div class="field">
+        <label for="loan-principal">대출 원금 (원)</label>
+        <input type="number" id="loan-principal" min="0" step="100000" value="100000000" inputmode="numeric" />
+      </div>
+      <div class="field">
+        <label for="loan-rate">연이율 (%)</label>
+        <input type="number" id="loan-rate" min="0" max="100" step="0.01" value="4.5" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <label for="loan-years">상환 기간 (년)</label>
+        <input type="number" id="loan-years" min="1" max="50" step="1" value="20" inputmode="numeric" />
+        <div class="hint">원리금균등상환 기준</div>
+      </div>
+      <div class="result" id="loan-result"></div>
+    </section>
+
+    <section id="panel-savings" class="panel" role="tabpanel" hidden>
+      <div class="field">
+        <label for="save-monthly">월 납입액 (원)</label>
+        <input type="number" id="save-monthly" min="0" step="10000" value="500000" inputmode="numeric" />
+      </div>
+      <div class="field">
+        <label for="save-rate">연이율 (%)</label>
+        <input type="number" id="save-rate" min="0" max="100" step="0.01" value="3.5" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <label for="save-years">기간 (년)</label>
+        <input type="number" id="save-years" min="1" max="60" step="1" value="10" inputmode="numeric" />
+        <div class="hint">월복리 가정</div>
+      </div>
+      <div class="result" id="savings-result"></div>
+    </section>
+
+    <section id="panel-goal" class="panel" role="tabpanel" hidden>
+      <div class="field">
+        <label for="goal-amount">목표 금액 (원)</label>
+        <input type="number" id="goal-amount" min="0" step="100000" value="50000000" inputmode="numeric" />
+      </div>
+      <div class="field">
+        <label for="goal-rate">연이율 (%)</label>
+        <input type="number" id="goal-rate" min="0" max="100" step="0.01" value="3.5" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <label for="goal-years">목표 기간 (년)</label>
+        <input type="number" id="goal-years" min="1" max="60" step="1" value="10" inputmode="numeric" />
+        <div class="hint">월복리, 매월 같은 금액 납입 시 필요 월 납입액</div>
+      </div>
+      <div class="result" id="goal-result"></div>
+    </section>
+
+    <footer>참고용 계산입니다. 실제 금융상품은 금융기관 조건을 확인하세요.</footer>
+  </div>
+
+  <script>
+    const formatWon = (n) =>
+      new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 }).format(Math.round(n)) + "원";
+
+    function tabInit() {
+      const buttons = document.querySelectorAll(".tabs button");
+      const panels = document.querySelectorAll(".panel");
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.tab;
+          buttons.forEach((b) => {
+            b.classList.toggle("active", b === btn);
+            b.setAttribute("aria-selected", b === btn ? "true" : "false");
+          });
+          panels.forEach((p) => {
+            const on = p.id === "panel-" + id;
+            p.classList.toggle("active", on);
+            p.hidden = !on;
+          });
+        });
+      });
+    }
+
+    function loanPayment(principal, annualRate, years) {
+      const n = years * 12;
+      if (n <= 0) return 0;
+      const r = annualRate / 100 / 12;
+      if (r === 0) return principal / n;
+      return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    }
+
+    function updateLoan() {
+      const principal = Number(document.getElementById("loan-principal").value) || 0;
+      const rate = Number(document.getElementById("loan-rate").value) || 0;
+      const years = Number(document.getElementById("loan-years").value) || 0;
+      const monthly = loanPayment(principal, rate, years);
+      const total = monthly * years * 12;
+      const interest = total - principal;
+      const el = document.getElementById("loan-result");
+      if (years <= 0 || principal <= 0) {
+        el.innerHTML = "<p style='margin:0;color:var(--muted)'>금액과 기간을 입력해 주세요.</p>";
+        return;
+      }
+      el.innerHTML = `
+        <h3>계산 결과</h3>
+        <p class="big">월 상환액 ${formatWon(monthly)}</p>
+        <div class="row"><span>총 상환액</span><span>${formatWon(total)}</span></div>
+        <div class="row"><span>총 이자</span><span>${formatWon(interest)}</span></div>
+      `;
+    }
+
+    function futureValueMonthly(monthly, annualRate, years) {
+      const n = years * 12;
+      const r = annualRate / 100 / 12;
+      if (r === 0) return monthly * n;
+      return monthly * ((Math.pow(1 + r, n) - 1) / r);
+    }
+
+    function updateSavings() {
+      const monthly = Number(document.getElementById("save-monthly").value) || 0;
+      const rate = Number(document.getElementById("save-rate").value) || 0;
+      const years = Number(document.getElementById("save-years").value) || 0;
+      const fv = futureValueMonthly(monthly, rate, years);
+      const principal = monthly * years * 12;
+      const gain = fv - principal;
+      const el = document.getElementById("savings-result");
+      if (years <= 0) {
+        el.innerHTML = "<p style='margin:0;color:var(--muted)'>기간을 입력해 주세요.</p>";
+        return;
+      }
+      el.innerHTML = `
+        <h3>만기 예상</h3>
+        <p class="big">총 ${formatWon(fv)}</p>
+        <div class="row"><span>납입 원금 합계</span><span>${formatWon(principal)}</span></div>
+        <div class="row"><span>이자 수익</span><span>${formatWon(gain)}</span></div>
+      `;
+    }
+
+    function paymentForGoal(future, annualRate, years) {
+      const n = years * 12;
+      const r = annualRate / 100 / 12;
+      if (n <= 0) return 0;
+      if (r === 0) return future / n;
+      return (future * r) / (Math.pow(1 + r, n) - 1);
+    }
+
+    function updateGoal() {
+      const future = Number(document.getElementById("goal-amount").value) || 0;
+      const rate = Number(document.getElementById("goal-rate").value) || 0;
+      const years = Number(document.getElementById("goal-years").value) || 0;
+      const monthly = paymentForGoal(future, rate, years);
+      const totalIn = monthly * years * 12;
+      const el = document.getElementById("goal-result");
+      if (years <= 0 || future <= 0) {
+        el.innerHTML = "<p style='margin:0;color:var(--muted)'>목표 금액과 기간을 입력해 주세요.</p>";
+        return;
+      }
+      el.innerHTML = `
+        <h3>필요 월 납입</h3>
+        <p class="big">${formatWon(monthly)}</p>
+        <div class="row"><span>납입 원금 합계</span><span>${formatWon(totalIn)}</span></div>
+        <div class="row"><span>목표 대비 차이</span><span>${formatWon(totalIn - future)}</span></div>
+      `;
+    }
+
+    function wire() {
+      [
+        ["loan-principal", "loan-rate", "loan-years"],
+        ["save-monthly", "save-rate", "save-years"],
+        ["goal-amount", "goal-rate", "goal-years"],
+      ].forEach((ids) => {
+        ids.forEach((id) => {
+          document.getElementById(id).addEventListener("input", () => {
+            if (ids[0].startsWith("loan")) updateLoan();
+            else if (ids[0].startsWith("save")) updateSavings();
+            else updateGoal();
+          });
+        });
+      });
+    }
+
+    tabInit();
+    wire();
+    updateLoan();
+    updateSavings();
+    updateGoal();
+  </script>
+</body>
+</html>
